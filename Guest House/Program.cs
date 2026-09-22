@@ -1,22 +1,17 @@
-using System;
-using System.Linq;
-using System.Security.Claims;
-using System.Text;
 using Guest_House.Data;
 using Guest_House.DTOs.Common;
 using Guest_House.Middleware;
+using Guest_House.Services;
 using Guest_House.Services.Auth;
 using Guest_House.Services.Password;
 using Guest_House.Services.Token;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
+using System.Security.Claims;
+using System.Text;
 
 namespace Guest_House
 {
@@ -26,11 +21,18 @@ namespace Guest_House
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            // Global Dapper setting: maps snake_case DB columns to PascalCase C# properties
+            Dapper.DefaultTypeMap.MatchNamesWithUnderscores = true;
+
             // 1. Database Context Configuration
             var connectionString = builder.Configuration.GetConnectionString("dbConn")
                 ?? "Server=localhost;Database=GuestHouse;Trusted_Connection=True;TrustServerCertificate=True;";
             builder.Services.AddDbContext<GuestHouseContext>(options =>
                 options.UseSqlServer(connectionString));
+
+            // Dapper-based services (Guest & Booking module)
+            builder.Services.AddScoped<GuestService>();
+            builder.Services.AddScoped<BookingService>();
 
             // 2. Controllers and Standardized Model Validation Responses
             builder.Services.AddControllers();
@@ -140,7 +142,6 @@ namespace Guest_House
                     Description = "RESTful Web API for Kalika Hotel & Lodge, Itahari-9, Buspark."
                 });
 
-                // Add JWT Bearer Security Definition ("Authorize" button in Swagger UI)
                 options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {
                     Name = "Authorization",
@@ -164,7 +165,6 @@ namespace Guest_House
 
             // 7. HTTP Request Pipeline Configuration
 
-            // A. Global Centralized Exception Handling Middleware
             app.UseMiddleware<ExceptionMiddleware>();
 
             if (!app.Environment.IsDevelopment())
@@ -172,7 +172,6 @@ namespace Guest_House
                 app.UseHsts();
             }
 
-            // B. Swagger Documentation UI
             app.UseSwagger();
             app.UseSwaggerUI(c =>
             {
@@ -184,11 +183,9 @@ namespace Guest_House
 
             app.UseRouting();
 
-            // C. Authentication MUST run before Authorization
             app.UseAuthentication();
             app.UseAuthorization();
 
-            // D. Endpoint Routing
             app.MapControllers();
             app.MapStaticAssets();
             app.MapRazorPages().WithStaticAssets();

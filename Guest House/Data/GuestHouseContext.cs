@@ -1,8 +1,5 @@
-using System;
-using System.Collections.Generic;
 using Guest_House.Models;
 using Microsoft.EntityFrameworkCore;
-
 namespace Guest_House.Data;
 
 public partial class GuestHouseContext : DbContext
