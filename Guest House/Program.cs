@@ -34,6 +34,11 @@ namespace Guest_House
             builder.Services.AddScoped<GuestService>();
             builder.Services.AddScoped<BookingService>();
 
+            // EF Core-based services (Hotel module)
+            builder.Services.AddScoped<HotelService>();
+            builder.Services.AddScoped<HotelExpenseService>();
+            builder.Services.AddScoped<WebsiteSyncLogService>();
+
             // 2. Controllers and Standardized Model Validation Responses
             builder.Services.AddControllers();
             builder.Services.Configure<ApiBehaviorOptions>(options =>
