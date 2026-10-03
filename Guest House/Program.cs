@@ -1,5 +1,6 @@
 using Guest_House.Data;
 using Guest_House.DTOs.Common;
+using Guest_House.DTOs.Room;
 using Guest_House.Middleware;
 using Guest_House.Services;
 using Guest_House.Services.Auth;
