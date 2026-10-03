@@ -320,7 +320,24 @@ public partial class GuestHouseContext : DbContext
                 .HasConstraintName("FK_website_sync_log_hotel");
         });
 
+        foreach (var entity in modelBuilder.Model.GetEntityTypes())
+        {
+            foreach (var property in entity.GetProperties())
+            {
+                property.SetColumnName(ToSnakeCase(property.Name));
+            }
+        }
+
         OnModelCreatingPartial(modelBuilder);
+    }
+
+    private static string ToSnakeCase(string input)
+    {
+        if (string.IsNullOrEmpty(input)) return input;
+        return System.Text.RegularExpressions.Regex.Replace(
+            input,
+            @"(?<=[a-z0-9])([A-Z])",
+            "_$1").ToLowerInvariant();
     }
 
     partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
