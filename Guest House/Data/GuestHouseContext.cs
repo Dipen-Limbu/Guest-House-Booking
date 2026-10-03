@@ -93,6 +93,13 @@ public partial class GuestHouseContext : DbContext
         {
             entity.HasKey(e => e.ChargeId).HasName("PK__expense___F3F52EBC8523040C");
 
+            entity.ToTable("expense_charge", t =>
+            {
+                t.HasCheckConstraint("CK_expense_charge_charge_type", 
+                    "[charge_type] IN ('room_charge', 'room_order', 'minibar', 'laundry', 'damage', 'extra_bed', 'service_fee', 'other')");
+                t.HasCheckConstraint("CK_expense_charge_amount", "[amount] >= 0");
+            });
+
             entity.Property(e => e.IncurredAt).HasDefaultValueSql("(sysdatetime())");
 
             entity.HasOne(d => d.RoomOrder).WithMany(p => p.ExpenseCharges).HasConstraintName("FK_expense_charge_room_order");
@@ -132,6 +139,19 @@ public partial class GuestHouseContext : DbContext
         {
             entity.HasKey(e => e.InvoiceId).HasName("PK__invoice__F58DFD498E7AFB15");
 
+            entity.ToTable("invoice", t =>
+            {
+                t.HasCheckConstraint("CK_invoice_status", 
+                    "[invoice_status] IN ('unpaid', 'partially_paid', 'paid', 'cancelled')");
+                t.HasCheckConstraint("CK_invoice_room_charge_total", "[room_charge_total] >= 0");
+                t.HasCheckConstraint("CK_invoice_extra_charge_total", "[extra_charge_total] >= 0");
+                t.HasCheckConstraint("CK_invoice_tax_amount", "[tax_amount] >= 0");
+                t.HasCheckConstraint("CK_invoice_discount_amount", "[discount_amount] >= 0");
+                t.HasCheckConstraint("CK_invoice_grand_total", "[grand_total] >= 0");
+                t.HasCheckConstraint("CK_invoice_paid_amount", "[paid_amount] >= 0");
+                t.HasCheckConstraint("CK_invoice_due_amount", "[due_amount] >= 0");
+            });
+
             entity.Property(e => e.GeneratedAt).HasDefaultValueSql("(sysdatetime())");
             entity.Property(e => e.InvoiceStatus).HasDefaultValue("unpaid");
 
@@ -143,6 +163,15 @@ public partial class GuestHouseContext : DbContext
         modelBuilder.Entity<InvoiceItem>(entity =>
         {
             entity.HasKey(e => e.InvoiceItemId).HasName("PK__invoice___84ECDEE94302E4E3");
+
+            entity.ToTable("invoice_item", t =>
+            {
+                t.HasCheckConstraint("CK_invoice_item_item_type", 
+                    "[item_type] IN ('room', 'room_order', 'laundry', 'minibar', 'damage', 'extra_bed', 'service', 'other')");
+                t.HasCheckConstraint("CK_invoice_item_quantity", "[quantity] > 0");
+                t.HasCheckConstraint("CK_invoice_item_unit_price", "[unit_price] >= 0");
+                t.HasCheckConstraint("CK_invoice_item_amount", "[amount] >= 0");
+            });
 
             entity.Property(e => e.Quantity).HasDefaultValue(1);
 

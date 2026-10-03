@@ -3,6 +3,7 @@ using Guest_House.DTOs.Common;
 using Guest_House.Middleware;
 using Guest_House.Services;
 using Guest_House.Services.Auth;
+using Guest_House.Services.Billing;
 using Guest_House.Services.Password;
 using Guest_House.Services.Token;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -33,6 +34,10 @@ namespace Guest_House
             // Dapper-based services (Guest & Booking module)
             builder.Services.AddScoped<GuestService>();
             builder.Services.AddScoped<BookingService>();
+
+            // Billing & Invoice module services
+            builder.Services.AddScoped<IExpenseChargeService, ExpenseChargeService>();
+            builder.Services.AddScoped<IInvoiceService, InvoiceService>();
 
             // 2. Controllers and Standardized Model Validation Responses
             builder.Services.AddControllers();
@@ -159,6 +164,13 @@ namespace Guest_House
                         new List<string>()
                     }
                 });
+
+                var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var xmlPath = System.IO.Path.Combine(AppContext.BaseDirectory, xmlFile);
+                if (System.IO.File.Exists(xmlPath))
+                {
+                    options.IncludeXmlComments(xmlPath, includeControllerXmlComments: true);
+                }
             });
 
             var app = builder.Build();
