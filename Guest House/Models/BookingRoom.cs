@@ -1,13 +1,21 @@
-﻿namespace Guest_House.Models;
+﻿using System;
+using System.Collections.Generic;
+
+namespace Guest_House.Models;
 
 public partial class BookingRoom
 {
     public int BookingRoomId { get; set; }
+
     public int BookingId { get; set; }
+
     public int RoomId { get; set; }
+
     public decimal RoomPrice { get; set; }
-    public int? NumberOfGuests { get; set; }
+
+    public int NumberOfGuests { get; set; }
 
     public virtual Booking Booking { get; set; } = null!;
+
     public virtual Room Room { get; set; } = null!;
 }
