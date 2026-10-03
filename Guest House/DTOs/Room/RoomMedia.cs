@@ -1,6 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
-namespace Guest_House.DTOs.RoomMedia
+namespace Guest_House.DTOs.Room
 {
     public class CreateRoomMediaDto
     {

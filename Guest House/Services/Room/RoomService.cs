@@ -1,9 +1,9 @@
-﻿using Guest_House.Data;
+using Guest_House.Data;
 using Guest_House.DTOs.Room;
 using Microsoft.EntityFrameworkCore;
 using RoomEntity = global::Guest_House.Models.Room;
 
-namespace Guest_House.Services
+namespace Guest_House.Services.Room
 {
     public class RoomService
     {

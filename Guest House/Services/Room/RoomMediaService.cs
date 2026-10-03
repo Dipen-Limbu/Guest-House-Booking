@@ -1,10 +1,9 @@
-﻿using Guest_House.Data;
+using Guest_House.Data;
 using Guest_House.DTOs.Room;
-using Guest_House.DTOs.RoomMedia;
 using Microsoft.EntityFrameworkCore;
 using RoomMediumEntity = global::Guest_House.Models.RoomMedium;
 
-namespace Guest_House.Services
+namespace Guest_House.Services.Room
 {
     public class RoomMediaService
     {

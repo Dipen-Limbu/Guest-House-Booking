@@ -1,4 +1,4 @@
-﻿using Guest_House.Data;
+using Guest_House.Data;
 using Guest_House.DTOs.Room;
 using Guest_House.Models;
 using Microsoft.EntityFrameworkCore;
@@ -37,7 +37,18 @@ namespace Guest_House.Services.Room
         {
             var dto = await _context.RoomCategories.AsNoTracking()
                 .Where(c => c.CategoryId == categoryId)
-                .Select(c => new RoomCategoryResponseDto { /* same projection as above */ })
+                .Select(c => new RoomCategoryResponseDto
+                {
+                    CategoryId = c.CategoryId,
+                    HotelId = c.HotelId,
+                    CategoryName = c.CategoryName,
+                    BasePrice = c.BasePrice,
+                    MaxOccupancy = c.MaxOccupancy,
+                    Description = c.Description,
+                    RoomCount = c.Rooms.Count,
+                    CreatedAt = c.CreatedAt,
+                    UpdatedAt = c.UpdatedAt
+                })
                 .FirstOrDefaultAsync();
 
             return dto ?? throw new KeyNotFoundException($"Room category with id {categoryId} was not found.");

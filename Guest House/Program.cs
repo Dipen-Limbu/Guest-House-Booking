@@ -5,6 +5,7 @@ using Guest_House.Middleware;
 using Guest_House.Services;
 using Guest_House.Services.Auth;
 using Guest_House.Services.Password;
+using Guest_House.Services.Room;
 using Guest_House.Services.Token;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
@@ -31,9 +32,12 @@ namespace Guest_House
             builder.Services.AddDbContext<GuestHouseContext>(options =>
                 options.UseSqlServer(connectionString));
 
-            // Dapper-based services (Guest & Booking module)
+            // Dapper & EF Core services
             builder.Services.AddScoped<GuestService>();
             builder.Services.AddScoped<BookingService>();
+            builder.Services.AddScoped<RoomService>();
+            builder.Services.AddScoped<RoomCategoryService>();
+            builder.Services.AddScoped<RoomMediaService>();
 
             // 2. Controllers and Standardized Model Validation Responses
             builder.Services.AddControllers();
