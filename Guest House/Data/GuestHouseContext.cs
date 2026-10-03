@@ -65,6 +65,7 @@ public partial class GuestHouseContext : DbContext
     {
         modelBuilder.Entity<Booking>(entity =>
         {
+            entity.ToTable("booking");
             entity.HasKey(e => e.BookingId).HasName("PK__booking__5DE3A5B1A1852AEF");
 
             entity.Property(e => e.BookingStatus).HasDefaultValue("confirmed");
@@ -78,6 +79,7 @@ public partial class GuestHouseContext : DbContext
 
         modelBuilder.Entity<BookingRoom>(entity =>
         {
+            entity.ToTable("booking_room");
             entity.HasKey(e => e.BookingRoomId).HasName("PK__booking___083C323CF8FCDD25");
 
             entity.Property(e => e.NumberOfGuests).HasDefaultValue(1);
@@ -91,6 +93,7 @@ public partial class GuestHouseContext : DbContext
 
         modelBuilder.Entity<ExpenseCharge>(entity =>
         {
+            entity.ToTable("expense_charge");
             entity.HasKey(e => e.ChargeId).HasName("PK__expense___F3F52EBC8523040C");
 
             entity.Property(e => e.IncurredAt).HasDefaultValueSql("(sysdatetime())");
@@ -104,6 +107,7 @@ public partial class GuestHouseContext : DbContext
 
         modelBuilder.Entity<Guest>(entity =>
         {
+            entity.ToTable("guest");
             entity.HasKey(e => e.GuestId).HasName("PK__guest__19778E35E72EB441");
 
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysdatetime())");
@@ -112,6 +116,7 @@ public partial class GuestHouseContext : DbContext
 
         modelBuilder.Entity<Hotel>(entity =>
         {
+            entity.ToTable("hotel");
             entity.HasKey(e => e.HotelId).HasName("PK__hotel__45FE7E26B6AB96C7");
 
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
@@ -119,6 +124,7 @@ public partial class GuestHouseContext : DbContext
 
         modelBuilder.Entity<HotelExpense>(entity =>
         {
+            entity.ToTable("hotel_expense");
             entity.HasKey(e => e.ExpenseId).HasName("PK__hotel_ex__404B6A6B6241CB8E");
 
             entity.Property(e => e.ExpenseDate).HasDefaultValueSql("(sysdatetime())");
@@ -130,6 +136,7 @@ public partial class GuestHouseContext : DbContext
 
         modelBuilder.Entity<Invoice>(entity =>
         {
+            entity.ToTable("invoice");
             entity.HasKey(e => e.InvoiceId).HasName("PK__invoice__F58DFD498E7AFB15");
 
             entity.Property(e => e.GeneratedAt).HasDefaultValueSql("(sysdatetime())");
@@ -142,6 +149,7 @@ public partial class GuestHouseContext : DbContext
 
         modelBuilder.Entity<InvoiceItem>(entity =>
         {
+            entity.ToTable("invoice_item");
             entity.HasKey(e => e.InvoiceItemId).HasName("PK__invoice___84ECDEE94302E4E3");
 
             entity.Property(e => e.Quantity).HasDefaultValue(1);
@@ -151,6 +159,7 @@ public partial class GuestHouseContext : DbContext
 
         modelBuilder.Entity<MenuCategory>(entity =>
         {
+            entity.ToTable("menu_category");
             entity.HasKey(e => e.MenuCategoryId).HasName("PK__menu_cat__E3FCE267B00BEA9A");
 
             entity.HasOne(d => d.Hotel).WithMany(p => p.MenuCategories)
@@ -160,6 +169,7 @@ public partial class GuestHouseContext : DbContext
 
         modelBuilder.Entity<MenuItem>(entity =>
         {
+            entity.ToTable("menu_item");
             entity.HasKey(e => e.MenuItemId).HasName("PK__menu_ite__973431D5E3BF0586");
 
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysdatetime())");
@@ -173,6 +183,7 @@ public partial class GuestHouseContext : DbContext
 
         modelBuilder.Entity<Payment>(entity =>
         {
+            entity.ToTable("payment");
             entity.HasKey(e => e.PaymentId).HasName("PK__payment__ED1FC9EAE8DCF960");
 
             entity.Property(e => e.PaidAt).HasDefaultValueSql("(sysdatetime())");
@@ -187,11 +198,13 @@ public partial class GuestHouseContext : DbContext
 
         modelBuilder.Entity<Role>(entity =>
         {
+            entity.ToTable("role");
             entity.HasKey(e => e.RoleId).HasName("PK__role__760965CC2BE7F92A");
         });
 
         modelBuilder.Entity<Room>(entity =>
         {
+            entity.ToTable("room");
             entity.HasKey(e => e.RoomId).HasName("PK__room__19675A8A4B774315");
 
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysdatetime())");
@@ -209,6 +222,7 @@ public partial class GuestHouseContext : DbContext
 
         modelBuilder.Entity<RoomCategory>(entity =>
         {
+            entity.ToTable("room_category");
             entity.HasKey(e => e.CategoryId).HasName("PK__room_cat__D54EE9B48EAB7E99");
 
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysdatetime())");
@@ -222,6 +236,7 @@ public partial class GuestHouseContext : DbContext
 
         modelBuilder.Entity<RoomMedium>(entity =>
         {
+            entity.ToTable("room_media");
             entity.HasKey(e => e.MediaId).HasName("PK__room_med__D0A840F42C338844");
 
             entity.Property(e => e.DisplayOrder).HasDefaultValue(0);
@@ -232,6 +247,7 @@ public partial class GuestHouseContext : DbContext
 
         modelBuilder.Entity<RoomOrder>(entity =>
         {
+            entity.ToTable("room_order");
             entity.HasKey(e => e.OrderId).HasName("PK__room_ord__4659622966EB661B");
 
             entity.Property(e => e.OrderStatus).HasDefaultValue("pending");
@@ -248,6 +264,7 @@ public partial class GuestHouseContext : DbContext
 
         modelBuilder.Entity<RoomOrderItem>(entity =>
         {
+            entity.ToTable("room_order_item");
             entity.HasKey(e => e.OrderItemId).HasName("PK__room_ord__3764B6BC38D39CEE");
 
             entity.Property(e => e.Quantity).HasDefaultValue(1);
@@ -261,6 +278,7 @@ public partial class GuestHouseContext : DbContext
 
         modelBuilder.Entity<StaffUser>(entity =>
         {
+            entity.ToTable("staff_user");
             entity.HasKey(e => e.UserId).HasName("PK__staff_us__B9BE370F5FAF11F2");
 
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysdatetime())");
@@ -278,6 +296,7 @@ public partial class GuestHouseContext : DbContext
 
         modelBuilder.Entity<Stay>(entity =>
         {
+            entity.ToTable("stay");
             entity.HasKey(e => e.StayId).HasName("PK__stay__C2B9B01F6D8F79C1");
 
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysdatetime())");
@@ -290,6 +309,7 @@ public partial class GuestHouseContext : DbContext
 
         modelBuilder.Entity<WebsiteSyncLog>(entity =>
         {
+            entity.ToTable("website_sync_log");
             entity.HasKey(e => e.SyncId).HasName("PK__website___54E41ED0AF405D67");
 
             entity.Property(e => e.SyncStatus).HasDefaultValue("success");
