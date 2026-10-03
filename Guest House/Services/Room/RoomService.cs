@@ -1,5 +1,7 @@
 ﻿using Guest_House.Data;
 using Guest_House.DTOs.Room;
+using Guest_House.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace Guest_House.Services.Room
 {
