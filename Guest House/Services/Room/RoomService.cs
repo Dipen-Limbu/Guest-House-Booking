@@ -1,9 +1,9 @@
 ﻿using Guest_House.Data;
 using Guest_House.DTOs.Room;
-using Guest_House.Models;
 using Microsoft.EntityFrameworkCore;
+using RoomEntity = global::Guest_House.Models.Room;
 
-namespace Guest_House.Services.Room
+namespace Guest_House.Services
 {
     public class RoomService
     {
@@ -11,49 +11,68 @@ namespace Guest_House.Services.Room
         public static readonly string[] AllowedStatuses = { "available", "occupied", "maintenance", "cleaning" };
 
         private readonly GuestHouseContext _context;
-        public RoomService(GuestHouseContext context) => _context = context;
+
+        public RoomService(GuestHouseContext context)
+        {
+            _context = context;
+        }
 
         public async Task<List<RoomResponseDto>> GetAllAsync(int? hotelId = null, int? categoryId = null, string? status = null)
         {
-            var query = _context.Rooms.AsNoTracking()
+            var query = _context.Rooms
+                .AsNoTracking()
                 .Include(r => r.Category)
                 .Include(r => r.RoomMedia)
                 .AsQueryable();
 
-            if (hotelId.HasValue) query = query.Where(r => r.HotelId == hotelId.Value);
-            if (categoryId.HasValue) query = query.Where(r => r.CategoryId == categoryId.Value);
+            if (hotelId.HasValue)
+                query = query.Where(r => r.HotelId == hotelId.Value);
+
+            if (categoryId.HasValue)
+                query = query.Where(r => r.CategoryId == categoryId.Value);
+
             if (!string.IsNullOrWhiteSpace(status))
             {
                 var normalized = NormalizeStatus(status);
                 query = query.Where(r => r.Status == normalized);
             }
 
-            var rooms = await query.OrderBy(r => r.HotelId).ThenBy(r => r.RoomNumber).ToListAsync();
-            return rooms.Select(ToDto).ToList();
+            var rooms = await query
+                .OrderBy(r => r.HotelId)
+                .ThenBy(r => r.RoomNumber)
+                .ToListAsync();
+
+            return rooms.Select(r => ToDto(r)).ToList();
         }
 
         public async Task<RoomResponseDto> GetByIdAsync(int roomId)
         {
-            var room = await _context.Rooms.AsNoTracking()
-                .Include(r => r.Category).Include(r => r.RoomMedia)
+            var room = await _context.Rooms
+                .AsNoTracking()
+                .Include(r => r.Category)
+                .Include(r => r.RoomMedia)
                 .FirstOrDefaultAsync(r => r.RoomId == roomId)
                 ?? throw new KeyNotFoundException($"Room with id {roomId} was not found.");
+
             return ToDto(room);
         }
 
         public async Task<RoomResponseDto> CreateAsync(CreateRoomDto dto)
         {
-            if (!await _context.Hotels.AnyAsync(h => h.HotelId == dto.HotelId))
+            var hotelExists = await _context.Hotels.AnyAsync(h => h.HotelId == dto.HotelId);
+            if (!hotelExists)
                 throw new KeyNotFoundException($"Hotel with id {dto.HotelId} was not found.");
 
             await EnsureCategoryBelongsToHotelAsync(dto.CategoryId, dto.HotelId);
 
             var roomNumber = dto.RoomNumber.Trim();
-            if (await _context.Rooms.AnyAsync(r => r.HotelId == dto.HotelId && r.RoomNumber == roomNumber))
+            var duplicate = await _context.Rooms
+                .AnyAsync(r => r.HotelId == dto.HotelId && r.RoomNumber == roomNumber);
+            if (duplicate)
                 throw new InvalidOperationException($"Room number '{roomNumber}' already exists in this hotel.");
 
             var now = DateTime.Now;
-            var room = new Room
+            var room = new RoomEntity
             {
                 HotelId = dto.HotelId,
                 CategoryId = dto.CategoryId,
@@ -67,6 +86,7 @@ namespace Guest_House.Services.Room
 
             _context.Rooms.Add(room);
             await _context.SaveChangesAsync();
+
             return await GetByIdAsync(room.RoomId);
         }
 
@@ -78,8 +98,9 @@ namespace Guest_House.Services.Room
             await EnsureCategoryBelongsToHotelAsync(dto.CategoryId, room.HotelId);
 
             var roomNumber = dto.RoomNumber.Trim();
-            if (await _context.Rooms.AnyAsync(r =>
-                    r.HotelId == room.HotelId && r.RoomNumber == roomNumber && r.RoomId != roomId))
+            var duplicate = await _context.Rooms
+                .AnyAsync(r => r.HotelId == room.HotelId && r.RoomNumber == roomNumber && r.RoomId != roomId);
+            if (duplicate)
                 throw new InvalidOperationException($"Room number '{roomNumber}' already exists in this hotel.");
 
             room.CategoryId = dto.CategoryId;
@@ -89,6 +110,7 @@ namespace Guest_House.Services.Room
             room.UpdatedAt = DateTime.Now;
 
             await _context.SaveChangesAsync();
+
             return await GetByIdAsync(roomId);
         }
 
@@ -99,13 +121,16 @@ namespace Guest_House.Services.Room
 
             room.Status = NormalizeStatus(dto.Status);
             room.UpdatedAt = DateTime.Now;
+
             await _context.SaveChangesAsync();
+
             return await GetByIdAsync(roomId);
         }
 
         public async Task DeleteAsync(int roomId)
         {
-            var room = await _context.Rooms.Include(r => r.RoomMedia)
+            var room = await _context.Rooms
+                .Include(r => r.RoomMedia)
                 .FirstOrDefaultAsync(r => r.RoomId == roomId)
                 ?? throw new KeyNotFoundException($"Room with id {roomId} was not found.");
 
@@ -121,9 +146,11 @@ namespace Guest_House.Services.Room
         }
 
         // ---- helpers ----
+
         private async Task EnsureCategoryBelongsToHotelAsync(int categoryId, int hotelId)
         {
-            var category = await _context.RoomCategories.AsNoTracking()
+            var category = await _context.RoomCategories
+                .AsNoTracking()
                 .Where(c => c.CategoryId == categoryId)
                 .Select(c => new { c.HotelId })
                 .FirstOrDefaultAsync()
@@ -141,22 +168,28 @@ namespace Guest_House.Services.Room
             return value;
         }
 
-        private static RoomResponseDto ToDto(Room r) => new()
+        private static RoomResponseDto ToDto(RoomEntity r)
         {
-            RoomId = r.RoomId,
-            HotelId = r.HotelId,
-            CategoryId = r.CategoryId,
-            CategoryName = r.Category.CategoryName,
-            BasePrice = r.Category.BasePrice,
-            MaxOccupancy = r.Category.MaxOccupancy,
-            RoomNumber = r.RoomNumber,
-            FloorNumber = r.FloorNumber,
-            Status = r.Status,
-            Description = r.Description,
-            Media = r.RoomMedia.OrderBy(m => m.DisplayOrder).ThenBy(m => m.MediaId)
-                               .Select(RoomMediaService.ToDto).ToList(),
-            CreatedAt = r.CreatedAt,
-            UpdatedAt = r.UpdatedAt
-        };
+            return new RoomResponseDto
+            {
+                RoomId = r.RoomId,
+                HotelId = r.HotelId,
+                CategoryId = r.CategoryId,
+                CategoryName = r.Category.CategoryName,
+                BasePrice = r.Category.BasePrice,
+                MaxOccupancy = r.Category.MaxOccupancy,
+                RoomNumber = r.RoomNumber,
+                FloorNumber = r.FloorNumber,
+                Status = r.Status,
+                Description = r.Description,
+                Media = r.RoomMedia
+                    .OrderBy(m => m.DisplayOrder)
+                    .ThenBy(m => m.MediaId)
+                    .Select(m => RoomMediaService.ToDto(m))
+                    .ToList(),
+                CreatedAt = r.CreatedAt,
+                UpdatedAt = r.UpdatedAt
+            };
+        }
     }
 }
