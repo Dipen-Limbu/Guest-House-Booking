@@ -33,6 +33,7 @@ namespace Guest_House
             // Dapper-based services (Guest & Booking module)
             builder.Services.AddScoped<GuestService>();
             builder.Services.AddScoped<BookingService>();
+            builder.Services.AddScoped<IPaymentService, PaymentService>();
 
             // 2. Controllers and Standardized Model Validation Responses
             builder.Services.AddControllers();
