@@ -1,7 +1,7 @@
-﻿using Guest_House.Data;
+using Guest_House.Data;
 using Guest_House.DTOs.Room;
-using Guest_House.Models;
 using Microsoft.EntityFrameworkCore;
+using RoomMediumEntity = global::Guest_House.Models.RoomMedium;
 
 namespace Guest_House.Services.Room
 {
@@ -10,22 +10,31 @@ namespace Guest_House.Services.Room
         public static readonly string[] AllowedMediaTypes = { "image", "video" };
 
         private readonly GuestHouseContext _context;
-        public RoomMediaService(GuestHouseContext context) => _context = context;
+
+        public RoomMediaService(GuestHouseContext context)
+        {
+            _context = context;
+        }
 
         public async Task<List<RoomMediaResponseDto>> GetByRoomAsync(int roomId)
         {
             await EnsureRoomExistsAsync(roomId);
-            var items = await _context.RoomMedia.AsNoTracking()
+
+            var items = await _context.RoomMedia
+                .AsNoTracking()
                 .Where(m => m.RoomId == roomId)
-                .OrderBy(m => m.DisplayOrder).ThenBy(m => m.MediaId)
+                .OrderBy(m => m.DisplayOrder)
+                .ThenBy(m => m.MediaId)
                 .ToListAsync();
-            return items.Select(ToDto).ToList();
+
+            return items.Select(m => ToDto(m)).ToList();
         }
 
         public async Task<RoomMediaResponseDto> GetByIdAsync(int mediaId)
         {
             var entity = await _context.RoomMedia.AsNoTracking().FirstOrDefaultAsync(m => m.MediaId == mediaId)
                 ?? throw new KeyNotFoundException($"Room media with id {mediaId} was not found.");
+
             return ToDto(entity);
         }
 
@@ -33,7 +42,7 @@ namespace Guest_House.Services.Room
         {
             await EnsureRoomExistsAsync(roomId);
 
-            var entity = new RoomMedium
+            var entity = new RoomMediumEntity
             {
                 RoomId = roomId,
                 MediaType = NormalizeMediaType(dto.MediaType),
@@ -45,6 +54,7 @@ namespace Guest_House.Services.Room
 
             _context.RoomMedia.Add(entity);
             await _context.SaveChangesAsync();
+
             return ToDto(entity);
         }
 
@@ -59,6 +69,7 @@ namespace Guest_House.Services.Room
             entity.DisplayOrder = dto.DisplayOrder;
 
             await _context.SaveChangesAsync();
+
             return ToDto(entity);
         }
 
@@ -66,14 +77,17 @@ namespace Guest_House.Services.Room
         {
             var entity = await _context.RoomMedia.FirstOrDefaultAsync(m => m.MediaId == mediaId)
                 ?? throw new KeyNotFoundException($"Room media with id {mediaId} was not found.");
+
             _context.RoomMedia.Remove(entity);
             await _context.SaveChangesAsync();
         }
 
         // ---- helpers ----
+
         private async Task EnsureRoomExistsAsync(int roomId)
         {
-            if (!await _context.Rooms.AnyAsync(r => r.RoomId == roomId))
+            var exists = await _context.Rooms.AnyAsync(r => r.RoomId == roomId);
+            if (!exists)
                 throw new KeyNotFoundException($"Room with id {roomId} was not found.");
         }
 
@@ -85,15 +99,18 @@ namespace Guest_House.Services.Room
             return value;
         }
 
-        public static RoomMediaResponseDto ToDto(RoomMedium m) => new()
+        public static RoomMediaResponseDto ToDto(RoomMediumEntity m)
         {
-            MediaId = m.MediaId,
-            RoomId = m.RoomId,
-            MediaType = m.MediaType,
-            FileUrl = m.FileUrl,
-            Caption = m.Caption,
-            DisplayOrder = m.DisplayOrder ?? 0,
-            UploadedAt = m.UploadedAt
-        };
+            return new RoomMediaResponseDto
+            {
+                MediaId = m.MediaId,
+                RoomId = m.RoomId,
+                MediaType = m.MediaType,
+                FileUrl = m.FileUrl,
+                Caption = m.Caption,
+                DisplayOrder = Convert.ToInt32(m.DisplayOrder), // works for int and int?
+                UploadedAt = m.UploadedAt
+            };
+        }
     }
 }

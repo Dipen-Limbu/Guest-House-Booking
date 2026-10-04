@@ -4,6 +4,7 @@ using System.Net;
 using System.Threading.Tasks;
 using Guest_House.DTOs.Common;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace Guest_House.Middleware
@@ -17,11 +18,13 @@ namespace Guest_House.Middleware
     {
         private readonly RequestDelegate _next;
         private readonly ILogger<ExceptionMiddleware> _logger;
+        private readonly IHostEnvironment _env;
 
-        public ExceptionMiddleware(RequestDelegate next, ILogger<ExceptionMiddleware> logger)
+        public ExceptionMiddleware(RequestDelegate next, ILogger<ExceptionMiddleware> logger, IHostEnvironment env)
         {
             _next = next;
             _logger = logger;
+            _env = env;
         }
 
         public async Task InvokeAsync(HttpContext context)
@@ -38,7 +41,7 @@ namespace Guest_House.Middleware
             }
         }
 
-        private static async Task HandleExceptionAsync(HttpContext context, Exception exception)
+        private async Task HandleExceptionAsync(HttpContext context, Exception exception)
         {
             if (context.Response.HasStarted)
             {
@@ -53,7 +56,7 @@ namespace Guest_House.Middleware
                 UnauthorizedAccessException => (StatusCodes.Status401Unauthorized, exception.Message),
                 ArgumentException => (StatusCodes.Status400BadRequest, exception.Message),
                 InvalidOperationException => (StatusCodes.Status400BadRequest, exception.Message),
-                _ => (StatusCodes.Status500InternalServerError, "An unexpected error occurred.")
+                _ => (StatusCodes.Status500InternalServerError, _env.IsDevelopment() ? exception.GetBaseException().Message : "An unexpected error occurred.")
             };
 
             context.Response.StatusCode = statusCode;
