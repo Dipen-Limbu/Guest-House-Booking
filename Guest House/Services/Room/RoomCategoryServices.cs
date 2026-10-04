@@ -100,6 +100,8 @@ namespace Guest_House.Services.Room
             return await GetByIdAsync(categoryId);
         }
 
+
+
         public async Task DeleteAsync(int categoryId)
         {
             var entity = await _context.RoomCategories.FirstOrDefaultAsync(c => c.CategoryId == categoryId)
