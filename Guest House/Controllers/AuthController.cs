@@ -14,6 +14,7 @@ namespace Guest_House.Controllers
     /// </summary>
     [ApiController]
     [Route("api/[controller]")]
+
     public class AuthController : ControllerBase
     {
         private readonly IAuthService _authService;
@@ -22,6 +23,7 @@ namespace Guest_House.Controllers
         {
             _authService = authService;
         }
+
 
         /// <summary>
         /// Authenticates a staff user and returns a signed JWT token
