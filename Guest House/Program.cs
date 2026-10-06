@@ -7,6 +7,10 @@ using Guest_House.Services.Auth;
 using Guest_House.Services.Password;
 using Guest_House.Services.Room;
 using Guest_House.Services.Token;
+using Guest_House.Services.Hotel;
+using Guest_House.Services.Menu;
+using Guest_House.Services.Payment;
+using Guest_House.Services.Stay;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -38,6 +42,24 @@ namespace Guest_House
             builder.Services.AddScoped<RoomService>();
             builder.Services.AddScoped<RoomCategoryService>();
             builder.Services.AddScoped<RoomMediaService>();
+
+            // Payment Services
+            builder.Services.AddScoped<IPaymentService, PaymentService>();
+            builder.Services.AddScoped<EsewaPaymentGatewayService>();
+            builder.Services.AddScoped<KhaltiPaymentGatewayService>();
+
+            // Hotel & Expense Services
+            builder.Services.AddScoped<IHotelService, HotelService>();
+            builder.Services.AddScoped<IHotelExpenseService, HotelExpenseService>();
+            builder.Services.AddScoped<IWebsiteSyncLogService, WebsiteSyncLogService>();
+
+            // Stay Management Service
+            builder.Services.AddScoped<IStayService, StayService>();
+
+            // Menu & Room Service Services
+            builder.Services.AddScoped<IMenuCategoryService, MenuCategoryService>();
+            builder.Services.AddScoped<IMenuItemService, MenuItemService>();
+            builder.Services.AddScoped<IRoomOrderService, RoomOrderService>();
 
             // 2. Controllers and Standardized Model Validation Responses
             builder.Services.AddControllers();
