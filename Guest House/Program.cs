@@ -4,6 +4,7 @@ using Guest_House.DTOs.Room;
 using Guest_House.Middleware;
 using Guest_House.Services;
 using Guest_House.Services.Auth;
+using Guest_House.Services.Billing;
 using Guest_House.Services.Password;
 using Guest_House.Services.Room;
 using Guest_House.Services.Token;
@@ -60,6 +61,10 @@ namespace Guest_House
             builder.Services.AddScoped<IMenuCategoryService, MenuCategoryService>();
             builder.Services.AddScoped<IMenuItemService, MenuItemService>();
             builder.Services.AddScoped<IRoomOrderService, RoomOrderService>();
+
+            // Billing & Invoice module services
+            builder.Services.AddScoped<IExpenseChargeService, ExpenseChargeService>();
+            builder.Services.AddScoped<IInvoiceService, InvoiceService>();
 
             // 2. Controllers and Standardized Model Validation Responses
             builder.Services.AddControllers();
@@ -186,6 +191,13 @@ namespace Guest_House
                         new List<string>()
                     }
                 });
+
+                var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var xmlPath = System.IO.Path.Combine(AppContext.BaseDirectory, xmlFile);
+                if (System.IO.File.Exists(xmlPath))
+                {
+                    options.IncludeXmlComments(xmlPath, includeControllerXmlComments: true);
+                }
             });
 
             var app = builder.Build();
